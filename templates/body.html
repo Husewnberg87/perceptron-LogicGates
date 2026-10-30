@@ -1,0 +1,86 @@
+<header class="top">
+  <h1>Perceptron: AND, OR, XOR</h1>
+  <p class="sub">Artificial Intelligence task &middot; <em>AND, OR, XOR qapıları &mdash; perseptron</em></p>
+</header>
+<main>
+<section class="card">
+  <h2>The task</h2>
+  <p>Build a <b>perceptron</b> (inputs <code>x1, x2</code>, weights <code>w1, w2</code>, bias <code>b</code>, step activation)
+  and teach it the logic gates <b>AND</b>, <b>OR</b> and <b>XOR</b> with the perceptron learning rule. Show step by step how the
+  weights change until the gate is learned. Expected result: AND and OR are learned by a single perceptron; XOR is not
+  (it is not linearly separable) and needs a hidden layer.</p>
+  <div class="tts">
+    <table><caption>AND</caption><tr><th>x1</th><th>x2</th><th>t</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>0</td></tr><tr><td>1</td><td>0</td><td>0</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table>
+    <table><caption>OR</caption><tr><th>x1</th><th>x2</th><th>t</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>1</td></tr></table>
+    <table><caption>XOR</caption><tr><th>x1</th><th>x2</th><th>t</th></tr><tr><td>0</td><td>0</td><td>0</td></tr><tr><td>0</td><td>1</td><td>1</td></tr><tr><td>1</td><td>0</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td></tr></table>
+    <div class="rule"><b>Perceptron rule</b><br>
+      <code>z = w1&middot;x1 + w2&middot;x2 + b</code><br>
+      <code>y = 1 if z &ge; 0 else 0</code><br>
+      <code>e = t &minus; y</code><br>
+      <code>w<sub>i</sub> &larr; w<sub>i</sub> + &eta;&middot;e&middot;x<sub>i</sub></code><br>
+      <code>b &larr; b + &eta;&middot;e</code></div>
+  </div>
+</section>
+
+<section class="card controls">
+  <label>Gate
+    <select id="gate"><option>AND</option><option>OR</option><option selected>XOR</option></select></label>
+  <label>Model
+    <select id="model"><option value="single">Single perceptron</option>
+      <option value="two_layer">Two layers (XOR only)</option></select></label>
+  <label>Learning rate &eta;
+    <select id="lr"><option value="1">1</option><option value="0.5">0.5</option><option value="0.1">0.1</option></select></label>
+  <label>w1 <input id="w1" type="number" value="0" step="0.5" min="-5" max="5"></label>
+  <label>w2 <input id="w2" type="number" value="0" step="0.5" min="-5" max="5"></label>
+  <label>b <input id="b" type="number" value="0" step="0.5" min="-5" max="5"></label>
+  <label>Max epochs <input id="epochs" type="number" value="10" min="1" max="50"></label>
+  <button id="run" class="primary">Train &amp; show</button>
+  <div id="err" class="err" role="alert"></div>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h2>Decision boundary <small id="plotCap"></small></h2>
+    <canvas id="plot" width="360" height="360"></canvas>
+    <p class="legend"><span class="dot one"></span> target 1 &nbsp; <span class="dot zero"></span> target 0 &nbsp;
+      green ring = classified correctly, red ring = wrong. Green area = output 1, red area = output 0.</p>
+  </div>
+  <div class="card">
+    <h2>Network <small>(weights now)</small></h2>
+    <svg id="net" viewBox="0 0 520 230" role="img" aria-label="Perceptron network"></svg>
+    <div id="status" class="status"></div>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Step by step</h2>
+  <div class="player">
+    <button id="first" title="Start">&#9198;</button>
+    <button id="prev" title="Previous step">&#9664;</button>
+    <button id="play" class="primary" title="Play / pause">&#9654; Play</button>
+    <button id="next" title="Next step">&#9654;</button>
+    <button id="last" title="End">&#9197;</button>
+    <input id="slider" type="range" min="0" max="0" value="0" aria-label="Step">
+    <span id="stepNo" class="muted"></span>
+    <label>Speed <select id="speed"><option value="1100">slow</option><option value="600" selected>normal</option><option value="200">fast</option></select></label>
+  </div>
+  <div id="explain" class="explain"></div>
+  <div id="chips" class="chips"></div>
+  <div id="live"></div>
+</section>
+
+<section class="card">
+  <h2>Compare all gates <small>(&eta;=1, start at w=0, b=0, 20 epochs)</small></h2>
+  <table id="summary" class="sum"></table>
+</section>
+
+<section class="card notes">
+  <h2>Why XOR fails on one perceptron</h2>
+  <ul>
+    <li>A single perceptron draws <b>one straight line</b> (<code>w1&middot;x1 + w2&middot;x2 + b = 0</code>) and says 1 on one side, 0 on the other.</li>
+    <li>AND and OR can be separated by a line, so the rule is guaranteed to converge (perceptron convergence theorem).</li>
+    <li>XOR needs the points (0,1) and (1,0) on one side and (0,0) and (1,1) on the other: no single line does that, so the weights keep cycling and errors never reach 0.</li>
+    <li><b>Fix:</b> add a hidden layer. Here <code>h1 = OR</code>, <code>h2 = NAND</code>, and <code>y = AND(h1, h2)</code> is XOR. In the (h1, h2) plane the four points become separable by a line.</li>
+  </ul>
+</section>
+</main>
